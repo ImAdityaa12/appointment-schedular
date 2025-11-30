@@ -139,33 +139,47 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-5xl mb-4">⏳</div>
+          <p className="text-xl font-semibold text-slate-700">Loading Dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <Button onClick={handleLogout} variant="outline">Logout</Button>
+        <div className="flex justify-between items-center mb-8 bg-white rounded-lg shadow p-6">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+            <p className="text-slate-600 mt-1">Manage appointments and time slots</p>
+          </div>
+          <Button onClick={handleLogout} variant="outline">
+            Logout
+          </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Appointments</CardTitle>
+          <Card className="shadow-lg">
+            <CardHeader className="bg-blue-50">
+              <CardTitle className="text-blue-900">Total Appointments</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">{appointments.length}</p>
+            <CardContent className="pt-6">
+              <p className="text-5xl font-bold text-blue-600">{appointments.length}</p>
+              <p className="text-slate-600 mt-2">Active bookings</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Blocked Slots</CardTitle>
+          <Card className="shadow-lg">
+            <CardHeader className="bg-red-50">
+              <CardTitle className="text-red-900">Blocked Slots</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">{blockedSlots.length}</p>
+            <CardContent className="pt-6">
+              <p className="text-5xl font-bold text-red-600">{blockedSlots.length}</p>
+              <p className="text-slate-600 mt-2">Unavailable times</p>
             </CardContent>
           </Card>
         </div>
@@ -173,9 +187,11 @@ export default function AdminDashboard() {
         <div className="mb-6">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>Block Time Slot</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                Block Time Slot
+              </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Block a Time Slot</DialogTitle>
               </DialogHeader>
@@ -228,7 +244,11 @@ export default function AdminDashboard() {
                     onChange={(e) => setBlockReason(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleBlockSlot} disabled={(!blockTime && !blockWholeDay) || blockLoading} className="w-full">
+                <Button 
+                  onClick={handleBlockSlot} 
+                  disabled={(!blockTime && !blockWholeDay) || blockLoading} 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
                   {blockLoading ? 'Blocking...' : blockWholeDay ? 'Block Whole Day' : 'Block Slot'}
                 </Button>
               </div>
@@ -236,79 +256,91 @@ export default function AdminDashboard() {
           </Dialog>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>All Appointments</CardTitle>
+        <Card className="mb-6 shadow-lg">
+          <CardHeader className="bg-blue-50">
+            <CardTitle className="text-blue-900">All Appointments</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Name</th>
-                    <th className="text-left p-2">Email</th>
-                    <th className="text-left p-2">Phone</th>
-                    <th className="text-left p-2">Date</th>
-                    <th className="text-left p-2">Time</th>
-                    <th className="text-left p-2">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((apt) => (
-                    <tr key={apt.id} className="border-b">
-                      <td className="p-2">{apt.name}</td>
-                      <td className="p-2">{apt.email}</td>
-                      <td className="p-2">{apt.phone}</td>
-                      <td className="p-2">{apt.date}</td>
-                      <td className="p-2">
-                        <Badge>{apt.time}</Badge>
-                      </td>
-                      <td className="p-2">{apt.notes || '-'}</td>
+          <CardContent className="pt-6">
+            {appointments.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-lg text-slate-600">No appointments yet</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-semibold">Name</th>
+                      <th className="text-left p-3 font-semibold">Email</th>
+                      <th className="text-left p-3 font-semibold">Phone</th>
+                      <th className="text-left p-3 font-semibold">Date</th>
+                      <th className="text-left p-3 font-semibold">Time</th>
+                      <th className="text-left p-3 font-semibold">Notes</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {appointments.map((apt) => (
+                      <tr key={apt.id} className="border-b hover:bg-slate-50">
+                        <td className="p-3">{apt.name}</td>
+                        <td className="p-3 text-slate-600">{apt.email}</td>
+                        <td className="p-3 text-slate-600">{apt.phone}</td>
+                        <td className="p-3 text-slate-600">{apt.date}</td>
+                        <td className="p-3">
+                          <Badge className="bg-blue-600">{apt.time}</Badge>
+                        </td>
+                        <td className="p-3 text-slate-600">{apt.notes || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Blocked Slots</CardTitle>
+        <Card className="shadow-lg">
+          <CardHeader className="bg-red-50">
+            <CardTitle className="text-red-900">Blocked Slots</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Date</th>
-                    <th className="text-left p-2">Time</th>
-                    <th className="text-left p-2">Reason</th>
-                    <th className="text-left p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {blockedSlots.map((slot) => (
-                    <tr key={slot.id} className="border-b">
-                      <td className="p-2">{slot.date}</td>
-                      <td className="p-2">
-                        <Badge variant="destructive">{slot.time}</Badge>
-                      </td>
-                      <td className="p-2">{slot.reason || '-'}</td>
-                      <td className="p-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRemoveBlockedSlot(slot.id)}
-                        >
-                          Remove
-                        </Button>
-                      </td>
+          <CardContent className="pt-6">
+            {blockedSlots.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-lg text-slate-600">No blocked slots</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-semibold">Date</th>
+                      <th className="text-left p-3 font-semibold">Time</th>
+                      <th className="text-left p-3 font-semibold">Reason</th>
+                      <th className="text-left p-3 font-semibold">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {blockedSlots.map((slot) => (
+                      <tr key={slot.id} className="border-b hover:bg-slate-50">
+                        <td className="p-3">{slot.date}</td>
+                        <td className="p-3">
+                          <Badge variant="destructive">{slot.time}</Badge>
+                        </td>
+                        <td className="p-3 text-slate-600">{slot.reason || '-'}</td>
+                        <td className="p-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveBlockedSlot(slot.id)}
+                          >
+                            Remove
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

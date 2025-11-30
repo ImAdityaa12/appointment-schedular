@@ -94,29 +94,15 @@ export default function SchedulePage() {
           </Link>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Schedule Your Astronomy Session</CardTitle>
-            <div className="flex gap-4 mt-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-slate-300 rounded"></div>
-                <span className="text-slate-600">Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                <span className="text-slate-600">Selected</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-slate-300 rounded opacity-50"></div>
-                <span className="text-slate-600">Unavailable</span>
-              </div>
-            </div>
+        <Card className="shadow-lg">
+          <CardHeader className="bg-blue-600 text-white">
+            <CardTitle className="text-3xl text-center">Schedule Your Astronomy Session</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="mb-2 block">Select Date</Label>
+                  <Label className="text-lg font-semibold mb-2 block">Select Date</Label>
                   <Calendar
                     mode="single"
                     selected={date}
@@ -125,7 +111,7 @@ export default function SchedulePage() {
                     className="rounded-md border"
                   />
                   {date && (
-                    <div className="mt-3 p-3 bg-slate-100 rounded-md">
+                    <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
                       <p className="text-sm text-slate-700">
                         Selected: <strong>{date.toLocaleDateString('en-US', { 
                           weekday: 'long', 
@@ -140,12 +126,12 @@ export default function SchedulePage() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label>Select Time</Label>
+                    <Label className="text-lg font-semibold">Select Time</Label>
                     {loadingSlots && (
-                      <span className="text-sm text-slate-500 animate-pulse">Loading slots...</span>
+                      <span className="text-sm text-blue-600">Loading...</span>
                     )}
                     {!loadingSlots && date && (
-                      <span className="text-sm text-slate-600">
+                      <span className="text-sm text-green-600 font-medium">
                         {TIME_SLOTS.length - unavailableTimes.length} available
                       </span>
                     )}
@@ -164,39 +150,32 @@ export default function SchedulePage() {
                             setSelectedTime(time);
                             toast.success(`Selected ${time}`);
                           }}
-                          className={`w-full transition-all ${
-                            isSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''
-                          } ${
-                            isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
-                          }`}
+                          className={isUnavailable ? 'opacity-50' : ''}
                         >
-                          {isUnavailable ? (
-                            <span className="line-through">{time}</span>
-                          ) : (
-                            time
-                          )}
+                          {isUnavailable ? <span className="line-through">{time}</span> : time}
                         </Button>
                       );
                     })}
                   </div>
                   {selectedTime && (
-                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <p className="text-sm text-blue-800">
+                    <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                      <p className="text-sm text-blue-900 font-medium">
                         ✓ Selected time: <strong>{selectedTime}</strong>
                       </p>
                     </div>
                   )}
                   {!loadingSlots && unavailableTimes.length === TIME_SLOTS.length && (
-                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="mt-3 p-3 bg-red-50 rounded-md border border-red-200">
                       <p className="text-sm text-red-800">
-                        ⚠ All slots are booked for this date. Please select another date.
+                        All slots are booked for this date. Please select another date.
                       </p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 bg-slate-50 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-900">Your Information</h3>
                 <div>
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -204,6 +183,7 @@ export default function SchedulePage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter your full name"
                   />
                 </div>
 
@@ -215,6 +195,7 @@ export default function SchedulePage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="your.email@example.com"
                   />
                 </div>
 
@@ -225,6 +206,7 @@ export default function SchedulePage() {
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+1 (555) 000-0000"
                   />
                 </div>
 
@@ -234,6 +216,7 @@ export default function SchedulePage() {
                     id="notes"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="Any special requests?"
                   />
                 </div>
               </div>
@@ -241,15 +224,9 @@ export default function SchedulePage() {
               <Button 
                 type="submit" 
                 disabled={loading || !selectedTime || loadingSlots} 
-                className="w-full text-lg py-6"
+                className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Booking...
-                  </span>
-                ) : (
-                  `Book Appointment ${selectedTime ? `at ${selectedTime}` : ''}`
-                )}
+                {loading ? 'Booking...' : `Book Appointment ${selectedTime ? `at ${selectedTime}` : ''}`}
               </Button>
               {!selectedTime && !loadingSlots && (
                 <p className="text-sm text-center text-slate-500">

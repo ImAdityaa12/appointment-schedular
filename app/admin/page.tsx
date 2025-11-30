@@ -40,12 +40,15 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center bg-blue-600 text-white">
+          <div className="mx-auto mb-3 w-16 h-16 bg-white rounded-full flex items-center justify-center">
+            <span className="text-3xl">🔐</span>
+          </div>
+          <CardTitle className="text-3xl">Admin Login</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6 pb-6">
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="username">Username</Label>
@@ -54,6 +57,7 @@ export default function AdminLoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                placeholder="Enter your username"
               />
             </div>
 
@@ -65,10 +69,15 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                placeholder="Enter your password"
               />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
               {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
