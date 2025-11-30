@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   const [blockDate, setBlockDate] = useState<Date | undefined>(new Date());
   const [blockTime, setBlockTime] = useState('');
   const [blockReason, setBlockReason] = useState('');
+  const [blockWholeDay, setBlockWholeDay] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
 
       setAppointments(appointmentsData);
       setBlockedSlots(blockedData);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch data');
     } finally {
       setLoading(false);
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
   };
 
   const handleBlockSlot = async () => {
-    if (!blockDate || !blockTime) return;
+    if (!blockDate || (!blockTime && !blockWholeDay)) return;
 
     setBlockLoading(true);
     try {
@@ -91,25 +92,44 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           date: blockDate.toISOString().split('T')[0],
           time: blockTime,
-          reason: blockReason
+          reason: blockReason,
+          blockWholeDay
         })
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        toast.success('Time slot blocked successfully');
+        toast.success(blockWholeDay ? 'Whole day blocked successfully' : 'Time slot blocked successfully');
         setDialogOpen(false);
         setBlockTime('');
         setBlockReason('');
+        setBlockWholeDay(false);
         fetchData();
       } else {
         toast.error(data.error || 'Failed to block slot');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to block slot');
     } finally {
       setBlockLoading(false);
+    }
+  };
+
+  const handleRemoveBlockedSlot = async (id: number) => {
+    try {
+      const res = await fetch(`/api/blocked-slots?id=${id}`, {
+        method: 'DELETE'
+      });
+
+      if (res.ok) {
+        toast.success('Blocked slot removed successfully');
+        fetchData();
+      } else {
+        toast.error('Failed to remove blocked slot');
+      }
+    } catch {
+      toast.error('Failed to remove blocked slot');
     }
   };
 
@@ -169,22 +189,37 @@ export default function AdminDashboard() {
                     className="rounded-md border"
                   />
                 </div>
-                <div>
-                  <Label>Select Time</Label>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {TIME_SLOTS.map((time) => (
-                      <Button
-                        key={time}
-                        type="button"
-                        variant={blockTime === time ? 'default' : 'outline'}
-                        onClick={() => setBlockTime(time)}
-                        size="sm"
-                      >
-                        {time}
-                      </Button>
-                    ))}
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="blockWholeDay"
+                    checked={blockWholeDay}
+                    onChange={(e) => {
+                      setBlockWholeDay(e.target.checked);
+                      if (e.target.checked) setBlockTime('');
+                    }}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="blockWholeDay" className="cursor-pointer">Block Whole Day</Label>
                 </div>
+                {!blockWholeDay && (
+                  <div>
+                    <Label>Select Time</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {TIME_SLOTS.map((time) => (
+                        <Button
+                          key={time}
+                          type="button"
+                          variant={blockTime === time ? 'default' : 'outline'}
+                          onClick={() => setBlockTime(time)}
+                          size="sm"
+                        >
+                          {time}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="reason">Reason (Optional)</Label>
                   <Input
@@ -193,8 +228,8 @@ export default function AdminDashboard() {
                     onChange={(e) => setBlockReason(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleBlockSlot} disabled={!blockTime || blockLoading} className="w-full">
-                  {blockLoading ? 'Blocking...' : 'Block Slot'}
+                <Button onClick={handleBlockSlot} disabled={(!blockTime && !blockWholeDay) || blockLoading} className="w-full">
+                  {blockLoading ? 'Blocking...' : blockWholeDay ? 'Block Whole Day' : 'Block Slot'}
                 </Button>
               </div>
             </DialogContent>
@@ -249,6 +284,7 @@ export default function AdminDashboard() {
                     <th className="text-left p-2">Date</th>
                     <th className="text-left p-2">Time</th>
                     <th className="text-left p-2">Reason</th>
+                    <th className="text-left p-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,6 +295,15 @@ export default function AdminDashboard() {
                         <Badge variant="destructive">{slot.time}</Badge>
                       </td>
                       <td className="p-2">{slot.reason || '-'}</td>
+                      <td className="p-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRemoveBlockedSlot(slot.id)}
+                        >
+                          Remove
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
