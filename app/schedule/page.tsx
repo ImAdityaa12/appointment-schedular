@@ -25,6 +25,7 @@ export default function SchedulePage() {
     notes: ''
   });
   const [loading, setLoading] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   useEffect(() => {
     if (date) {
@@ -33,12 +34,23 @@ export default function SchedulePage() {
   }, [date]);
 
   const fetchAvailableSlots = async (dateStr: string) => {
+    setLoadingSlots(true);
+    setSelectedTime('');
     try {
       const res = await fetch(`/api/available-slots?date=${dateStr}`);
       const data = await res.json();
       setUnavailableTimes(data.unavailableTimes || []);
-    } catch (error) {
+      
+      const availableCount = TIME_SLOTS.length - (data.unavailableTimes?.length || 0);
+      if (availableCount === 0) {
+        toast.info('No available slots for this date');
+      } else {
+        toast.success(`${availableCount} slot${availableCount !== 1 ? 's' : ''} available`);
+      }
+    } catch {
       toast.error('Failed to fetch available slots');
+    } finally {
+      setLoadingSlots(false);
     }
   };
 
@@ -66,7 +78,7 @@ export default function SchedulePage() {
       } else {
         toast.error('Failed to book appointment');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to book appointment');
     } finally {
       setLoading(false);
@@ -85,6 +97,20 @@ export default function SchedulePage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Schedule Your Astronomy Session</CardTitle>
+            <div className="flex gap-4 mt-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-slate-300 rounded"></div>
+                <span className="text-slate-600">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                <span className="text-slate-600">Selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-slate-300 rounded opacity-50"></div>
+                <span className="text-slate-600">Unavailable</span>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -98,27 +124,75 @@ export default function SchedulePage() {
                     disabled={(date) => date < new Date()}
                     className="rounded-md border"
                   />
+                  {date && (
+                    <div className="mt-3 p-3 bg-slate-100 rounded-md">
+                      <p className="text-sm text-slate-700">
+                        Selected: <strong>{date.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</strong>
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                  <Label className="mb-2 block">Select Time</Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Select Time</Label>
+                    {loadingSlots && (
+                      <span className="text-sm text-slate-500 animate-pulse">Loading slots...</span>
+                    )}
+                    {!loadingSlots && date && (
+                      <span className="text-sm text-slate-600">
+                        {TIME_SLOTS.length - unavailableTimes.length} available
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-3 gap-2">
                     {TIME_SLOTS.map((time) => {
                       const isUnavailable = unavailableTimes.includes(time);
+                      const isSelected = selectedTime === time;
                       return (
                         <Button
                           key={time}
                           type="button"
-                          variant={selectedTime === time ? 'default' : 'outline'}
-                          disabled={isUnavailable}
-                          onClick={() => setSelectedTime(time)}
-                          className="w-full"
+                          variant={isSelected ? 'default' : 'outline'}
+                          disabled={isUnavailable || loadingSlots}
+                          onClick={() => {
+                            setSelectedTime(time);
+                            toast.success(`Selected ${time}`);
+                          }}
+                          className={`w-full transition-all ${
+                            isSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                          } ${
+                            isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+                          }`}
                         >
-                          {time}
+                          {isUnavailable ? (
+                            <span className="line-through">{time}</span>
+                          ) : (
+                            time
+                          )}
                         </Button>
                       );
                     })}
                   </div>
+                  {selectedTime && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-800">
+                        ✓ Selected time: <strong>{selectedTime}</strong>
+                      </p>
+                    </div>
+                  )}
+                  {!loadingSlots && unavailableTimes.length === TIME_SLOTS.length && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-sm text-red-800">
+                        ⚠ All slots are booked for this date. Please select another date.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -164,9 +238,24 @@ export default function SchedulePage() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={loading || !selectedTime} className="w-full">
-                {loading ? 'Booking...' : 'Book Appointment'}
+              <Button 
+                type="submit" 
+                disabled={loading || !selectedTime || loadingSlots} 
+                className="w-full text-lg py-6"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Booking...
+                  </span>
+                ) : (
+                  `Book Appointment ${selectedTime ? `at ${selectedTime}` : ''}`
+                )}
               </Button>
+              {!selectedTime && !loadingSlots && (
+                <p className="text-sm text-center text-slate-500">
+                  Please select a date and time to continue
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>
