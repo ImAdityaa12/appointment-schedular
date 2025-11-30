@@ -6,6 +6,7 @@ A modern astronomy appointment booking system built with Next.js 15, Drizzle ORM
 
 - **Landing Page**: Hero section, services showcase, and customer reviews
 - **Appointment Scheduler**: Interactive calendar and time slot selection
+- **Payment Integration**: Razorpay payment gateway (₹999 per session)
 - **Real-time Availability**: Automatically disables booked and blocked time slots
 - **Admin Dashboard**: Protected admin panel for managing appointments and blocking slots
 - **Responsive Design**: Mobile-friendly UI with Shadcn components
@@ -28,13 +29,24 @@ A modern astronomy appointment booking system built with Next.js 15, Drizzle ORM
 
 ### 2. Environment Variables
 
-Update `.env.local` with your database URL:
+Update `.env.local` with your credentials:
 
 ```env
 DATABASE_URL=your_neon_database_url_here
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=astronomy2024
+
+# Razorpay Credentials
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
+
+**Get Razorpay Keys:**
+1. Sign up at [Razorpay](https://razorpay.com)
+2. Go to Settings > API Keys
+3. Generate Test/Live keys
+4. Add them to `.env.local`
 
 ### 3. Install Dependencies
 
@@ -63,13 +75,15 @@ Visit [http://localhost:3000](http://localhost:3000)
 2. Click "Book Your Session"
 3. Select a date and available time slot
 4. Fill in contact information
-5. Submit appointment
+5. Complete payment (₹999) via Razorpay
+6. Appointment is booked only after successful payment
 
 ### Admin Access
 1. Navigate to `/admin`
 2. Login with credentials from `.env.local`
 3. View all appointments
-4. Block time slots as needed
+4. Block individual time slots or entire days
+5. Remove blocked slots
 
 ## Project Structure
 

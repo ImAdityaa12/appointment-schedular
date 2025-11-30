@@ -8,11 +8,49 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import Script from 'next/script';
 
 const TIME_SLOTS = [
   '09:00', '10:00', '11:00', '12:00', '13:00', '14:00',
   '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
 ];
+
+const BOOKING_PRICE = 999;
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string | undefined;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  theme: {
+    color: string;
+  };
+  modal: {
+    ondismiss: () => void;
+  };
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => {
+      open: () => void;
+    };
+  }
+}
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -54,40 +92,114 @@ export default function SchedulePage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePayment = async () => {
     if (!date || !selectedTime) return;
 
     setLoading(true);
     try {
-      const res = await fetch('/api/appointments', {
+      // Create Razorpay order
+      const orderRes = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          date: date.toISOString().split('T')[0],
-          time: selectedTime
-        })
+        body: JSON.stringify({ amount: BOOKING_PRICE })
       });
 
-      if (res.ok) {
-        toast.success('Appointment booked successfully!');
-        setFormData({ name: '', email: '', phone: '', notes: '' });
-        setSelectedTime('');
-        fetchAvailableSlots(date.toISOString().split('T')[0]);
-      } else {
-        toast.error('Failed to book appointment');
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        toast.error('Failed to create payment order');
+        setLoading(false);
+        return;
       }
+
+      // Initialize Razorpay
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Astronomy Booking',
+        description: 'Astronomy Session Booking',
+        order_id: orderData.id,
+        handler: async function (response: RazorpayResponse) {
+          try {
+            // Verify payment
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              // Book appointment after successful payment
+              const bookingRes = await fetch('/api/appointments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...formData,
+                  date: date.toISOString().split('T')[0],
+                  time: selectedTime
+                })
+              });
+
+              if (bookingRes.ok) {
+                toast.success('Payment successful! Appointment booked.');
+                setFormData({ name: '', email: '', phone: '', notes: '' });
+                setSelectedTime('');
+                fetchAvailableSlots(date.toISOString().split('T')[0]);
+              } else {
+                toast.error('Payment successful but booking failed. Please contact support.');
+              }
+            } else {
+              toast.error('Payment verification failed');
+            }
+          } catch {
+            toast.error('Payment verification failed');
+          } finally {
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: '#2563eb'
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error('Payment cancelled');
+            setLoading(false);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch {
-      toast.error('Failed to book appointment');
-    } finally {
+      toast.error('Failed to initiate payment');
       setLoading(false);
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!date || !selectedTime) return;
+
+    handlePayment();
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <div className="min-h-screen bg-slate-50 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <Link href="/">
             <Button variant="outline">← Back to Home</Button>
@@ -221,12 +333,20 @@ export default function SchedulePage() {
                 </div>
               </div>
 
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold text-slate-900">Total Amount:</span>
+                  <span className="text-2xl font-bold text-blue-600">₹{BOOKING_PRICE}</span>
+                </div>
+                <p className="text-sm text-slate-600 mt-2">Secure payment via Razorpay</p>
+              </div>
+
               <Button 
                 type="submit" 
                 disabled={loading || !selectedTime || loadingSlots} 
                 className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? 'Booking...' : `Book Appointment ${selectedTime ? `at ${selectedTime}` : ''}`}
+                {loading ? 'Processing...' : `Pay ₹${BOOKING_PRICE} & Book Appointment`}
               </Button>
               {!selectedTime && !loadingSlots && (
                 <p className="text-sm text-center text-slate-500">
@@ -238,5 +358,6 @@ export default function SchedulePage() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
