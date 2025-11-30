@@ -201,7 +201,7 @@ export default function SchedulePage() {
         <div className="max-w-5xl mx-auto">
           <div className="mb-6">
             <Link href="/">
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-800">
+              <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white hover:bg-indigo-600/20 hover:border-indigo-500 hover:text-indigo-300 transition-all duration-300 hover:scale-105">
                 ← Back to Home
               </Button>
             </Link>
