@@ -220,50 +220,7 @@ export default function SchedulePage() {
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <Label className="text-lg font-semibold mb-3 block text-white">Select Date</Label>
-                    <div className="bg-slate-800 p-4 rounded-xl border-2 border-indigo-500/50 shadow-xl">
-                      <style jsx global>{`
-                        .rdp {
-                          --rdp-cell-size: 40px;
-                          --rdp-accent-color: #6366f1;
-                          --rdp-background-color: #4f46e5;
-                        }
-                        .rdp-months {
-                          color: white;
-                        }
-                        .rdp-caption {
-                          color: white;
-                        }
-                        .rdp-nav button {
-                          color: white;
-                        }
-                        .rdp-head_cell {
-                          color: #94a3b8;
-                          font-weight: 600;
-                        }
-                        .rdp-cell {
-                          color: white;
-                        }
-                        .rdp-day {
-                          color: white;
-                          border-radius: 8px;
-                        }
-                        .rdp-day:hover:not(.rdp-day_disabled) {
-                          background-color: #4f46e5;
-                        }
-                        .rdp-day_selected {
-                          background: linear-gradient(to right, #6366f1, #8b5cf6);
-                          color: white;
-                          font-weight: bold;
-                        }
-                        .rdp-day_disabled {
-                          color: #475569;
-                          opacity: 0.5;
-                        }
-                        .rdp-day_today {
-                          font-weight: bold;
-                          color: #a5b4fc;
-                        }
-                      `}</style>
+                    <div className="bg-slate-800 p-4 rounded-xl border-2 border-indigo-500/50 shadow-xl calendar-dark-theme">
                       <Calendar
                         mode="single"
                         selected={date}

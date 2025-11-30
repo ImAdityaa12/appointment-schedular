@@ -120,3 +120,65 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Calendar Dark Theme Styles */
+.calendar-dark-theme .rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #6366f1;
+  --rdp-background-color: #4f46e5;
+}
+
+.calendar-dark-theme .rdp-months {
+  color: white;
+}
+
+.calendar-dark-theme .rdp-caption {
+  color: white;
+}
+
+.calendar-dark-theme .rdp-nav button {
+  color: white;
+}
+
+.calendar-dark-theme .rdp-head_cell {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.calendar-dark-theme .rdp-cell {
+  color: white;
+}
+
+.calendar-dark-theme .rdp-day {
+  color: white;
+  border-radius: 8px;
+}
+
+.calendar-dark-theme .rdp-day:hover:not(.rdp-day_disabled) {
+  background-color: #4f46e5;
+}
+
+.calendar-dark-theme .rdp-day_selected {
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  color: white;
+  font-weight: bold;
+}
+
+.calendar-dark-theme .rdp-day_disabled {
+  color: #475569;
+  opacity: 0.5;
+}
+
+.calendar-dark-theme .rdp-day_today:not(.rdp-day_selected) {
+  font-weight: bold;
+  background-color: #4f46e5 !important;
+  color: white !important;
+  border: 2px solid #6366f1;
+}
+
+.calendar-dark-theme .rdp-day_today.rdp-day_selected {
+  background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
+  color: white !important;
+  font-weight: bold;
+  border: 2px solid #a78bfa;
+}
