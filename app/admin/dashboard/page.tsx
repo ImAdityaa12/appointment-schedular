@@ -202,12 +202,12 @@ export default function AdminDashboard() {
               <div className="space-y-4">
                 <div>
                   <Label className="text-slate-300">Select Date</Label>
-                  <div className="mt-2 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                  <div className="mt-2 bg-slate-800 p-4 rounded-xl border-2 border-indigo-500/50 shadow-xl">
                     <Calendar
                       mode="single"
                       selected={blockDate}
                       onSelect={setBlockDate}
-                      className="rounded-md"
+                      className="!bg-transparent text-white [&_.rdp-month_caption]:text-white [&_.rdp-weekday]:text-slate-400 [&_button]:text-white [&_button:hover]:bg-indigo-600/20 [&_button[data-selected-single=true]]:bg-gradient-to-r [&_button[data-selected-single=true]]:from-indigo-600 [&_button[data-selected-single=true]]:to-purple-600 [&_.rdp-today]:bg-indigo-600 [&_.rdp-today]:text-white"
                     />
                   </div>
                 </div>
