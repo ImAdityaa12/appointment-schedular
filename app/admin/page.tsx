@@ -40,29 +40,33 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center bg-blue-600 text-white">
-          <div className="mx-auto mb-3 w-16 h-16 bg-white rounded-full flex items-center justify-center">
-            <span className="text-3xl">🔐</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e520_1px,transparent_1px),linear-gradient(to_bottom,#4f46e520_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+      
+      <Card className="w-full max-w-md shadow-2xl bg-slate-900/50 border-slate-700 backdrop-blur-xl relative z-10">
+        <CardHeader className="text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-b border-slate-700">
+          <div className="mx-auto mb-4 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
+            <span className="text-4xl">🔐</span>
           </div>
-          <CardTitle className="text-3xl">Admin Login</CardTitle>
+          <CardTitle className="text-3xl font-bold">Admin Portal</CardTitle>
+          <p className="text-indigo-100 mt-2">Secure access to dashboard</p>
         </CardHeader>
-        <CardContent className="pt-6 pb-6">
-          <form onSubmit={handleLogin} className="space-y-4">
+        <CardContent className="pt-8 pb-8">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-slate-300">Username</Label>
               <Input
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 placeholder="Enter your username"
+                className="mt-2 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-slate-300">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -70,15 +74,22 @@ export default function AdminLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Enter your password"
+                className="mt-2 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
               />
             </div>
 
             <Button 
               type="submit" 
               disabled={loading} 
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full py-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-xl shadow-indigo-500/50"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin">⏳</span> Logging in...
+                </span>
+              ) : (
+                'Login to Dashboard →'
+              )}
             </Button>
           </form>
         </CardContent>
